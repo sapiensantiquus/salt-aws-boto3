@@ -1,8 +1,6 @@
 import logging
 
-import jmespath
-
-from aws_boto3.common import get_client
+from aws_boto3.common import get_client, object_search
 
 logger = logging.getLogger(__name__)
 
@@ -14,14 +12,11 @@ def __alias_name(alias):
 
 
 def get_alias_arn(alias):
-    client = get_client('kms')
-    pager = client.get_paginator('list_aliases').paginate()
-    query = "Aliases[?AliasName == '{}'].AliasArn".format(alias)
-    for page in pager:
-        result = jmespath.search(query, page)
-        if result:
-            return result
-    return False
+    return object_search(
+        client=get_client('kms'),
+        paginator='list_aliases',
+        query="Aliases[?AliasName == '{}'].AliasArn".format(alias)
+    )
 
 
 def kms_list_keys(client=None, region=None):
