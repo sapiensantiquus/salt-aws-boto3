@@ -1,6 +1,30 @@
 # <a name="kms"></a> KMS
 
 
+## `kms_ensure_key`
+
+Make sure the key exists with an alias.
+
+
+
+* alias_name: str
+* description: str
+* policy: str
+* bypass_policy_lockout_safety_check: boolean Default: False
+* key_usage: str Default: `ENCRYPT_DECRYPT`
+* origin: str Default: `AWS_KMS`
+* tags: list
+
+#### Example
+
+```yaml
+ensure-credstash-key:
+  module.run:
+    - name: aws_boto3.kms_ensure_key
+    - alias_name: credstash
+```
+
+
 ## `kms_create_key`
 
 Command:
