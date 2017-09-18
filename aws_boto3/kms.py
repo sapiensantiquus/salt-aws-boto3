@@ -1,8 +1,27 @@
 import logging
 
+import jmespath
+
 from aws_boto3.common import get_client
 
 logger = logging.getLogger(__name__)
+
+
+def __alias_name(alias):
+    if not alias.startswith('alias/'):
+        return 'alias/{}'.format(alias)
+    return alias
+
+
+def get_alias_arn(alias):
+    client = get_client('kms')
+    pager = client.get_paginator('list_aliases').paginate()
+    query = "Aliases[?AliasName == '{}'].AliasArn".format(alias)
+    for page in pager:
+        result = jmespath.search(query, page)
+        if result:
+            return result
+    return False
 
 
 def kms_list_keys(client=None, region=None):
@@ -28,6 +47,7 @@ def kms_create_key(description, policy=None, bypass_policy_lockout_safety_check=
 
 
 def kms_create_alias(alias_name, key_id):
+    alias_name = __alias_name(alias_name)
     create_alias_params = {
         'AliasName': alias_name,
         'TargetKeyId': key_id
@@ -40,3 +60,28 @@ def kms_create_alias(alias_name, key_id):
         logger.error(str(e))
         return False
     return True
+
+
+def kms_ensure_key(alias_name, description=None, policy=None, bypass_policy_lockout_safety_check=False,
+                   key_usage='ENCRYPT_DECRYPT', origin='AWS_KMS', tags=[]):
+    alias_name = __alias_name(alias_name)
+    key_alias = get_alias_arn(alias_name)
+
+    if not key_alias:
+        logger.debug('[kms_ensure_key] key does not exist... creating it...')
+        if description is None:
+            description = alias_name
+
+        key = kms_create_key(
+            description=description,
+            policy=policy,
+            bypass_policy_lockout_safety_check=bypass_policy_lockout_safety_check,
+            key_usage=key_usage,
+            origin=origin,
+            tags=tags
+        )
+        if kms_create_alias(alias_name, key['KeyId']):
+            # need to get the new alias arn
+            key_alias = get_alias_arn(alias_name)
+
+    return key_alias
