@@ -12,5 +12,6 @@ Use boto3 for AWS orchestration with Salt.
 
 ## Documentation
 
+* [ECR](./docs/ecr.md)
 * [IAM](./docs/iam.md)
 * [KMS](./docs/kms.md)
