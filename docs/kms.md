@@ -1,4 +1,4 @@
-# <a name="kms"></a> KMS
+# KMS
 
 
 ## `kms_ensure_key`
