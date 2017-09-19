@@ -1,4 +1,4 @@
-# <a name="iam"></a> IAM
+# IAM
 
 
 ## `iam_ensure_role`
