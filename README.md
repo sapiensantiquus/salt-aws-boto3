@@ -28,6 +28,7 @@ pip install --editable .
 
 ## <a name="docs"></a> Documentation
 
+* [DynamoDB](./docs/dynamodb.md)
 * [ECR](./docs/ecr.md)
 * [ECS](./docs/ecs.md)
 * [IAM](./docs/iam.md)
