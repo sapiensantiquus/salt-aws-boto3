@@ -9,4 +9,4 @@ def ecs_ensure_cluster(cluster_name):
         cluster_arn = response['cluster']['clusterArn']
     except Exception:
         raise
-    return {'clusterArn': cluster_arn}
+    return cluster_arn
