@@ -29,6 +29,7 @@ pip install --editable .
 ## <a name="docs"></a> Documentation
 
 * [ECR](./docs/ecr.md)
+* [ECS](./docs/ecs.md)
 * [IAM](./docs/iam.md)
 * [KMS](./docs/kms.md)
 
