@@ -7,6 +7,7 @@
 Property     | Type     | Required | Default     | Description
 -------------|----------|----------|-------------|-------------------------------------
 cluster_name | string   | yes      |             | The friendly name of the cluster.
+region       | string   | no       | us-east-1   | The AWS region
 
 
 #### Example

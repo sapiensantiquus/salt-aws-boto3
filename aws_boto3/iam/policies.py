@@ -3,16 +3,16 @@ from botocore.exceptions import ClientError
 from aws_boto3.common import dict_to_str, get_client, object_search
 
 
-def get_policy_arn(name):
+def get_policy_arn(name, region=None):
     return object_search(
-        client=get_client('iam'),
+        client=get_client('iam', region=region),
         paginator='list_policies',
         query="Policies[?PolicyName == '{}'].Arn".format(name),
         return_single=True
     )
 
 
-def create_policy(policy_name, policy_document, description=None, path=None):
+def create_policy(policy_name, policy_document, description=None, path=None, region=None):
     kwargs = {
         'PolicyName': policy_name,
         'PolicyDocument': dict_to_str(policy_document)
@@ -24,7 +24,7 @@ def create_policy(policy_name, policy_document, description=None, path=None):
 
     response = False
     try:
-        client = get_client('iam')
+        client = get_client('iam', region=region)
         response = client.create_policy(**kwargs)
         response = response['Policy']['Arn']
     except ClientError as e:

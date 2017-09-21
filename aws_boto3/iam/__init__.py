@@ -2,7 +2,7 @@ from aws_boto3.iam.policies import create_policy, get_policy_arn
 from aws_boto3.iam.roles import attach_role_policy, create_role, get_attached_policies, get_role_arn
 
 
-def iam_ensure_role(role_name, assume_role_policy_document, path=None, description=None,
+def iam_ensure_role(role_name, assume_role_policy_document, region=None, path=None, description=None,
                     attach_policy_name=None, attach_policy_path=None, attach_policy_description=None,
                     attach_policy_document=None):
     policy_arn = None

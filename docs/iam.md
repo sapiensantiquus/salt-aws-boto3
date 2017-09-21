@@ -14,6 +14,7 @@ attach_policy_name          | string   | no       |             | The friendly n
 attach_policy_path          | string   | no       |             | The path for the policy.
 attach_policy_description   | string   | no       |             | A friendly description of the policy.
 attach_policy_document      | mapping  | no       |             | The JSON policy document that you want to use as the content for the new policy.
+region                      | string   | no       | us-east-1   | The AWS region
 
 
 #### Example

@@ -11,22 +11,22 @@ def __alias_name(alias):
     return alias
 
 
-def get_alias_arn(alias):
+def get_alias_arn(alias, region=None):
     return object_search(
-        client=get_client('kms'),
+        client=get_client('kms', region=region),
         paginator='list_aliases',
         query="Aliases[?AliasName == '{}'].AliasArn".format(alias)
     )
 
 
 def kms_list_keys(client=None, region=None):
-    client = get_client('kms')
+    client = get_client('kms', region=region)
     response = client.list_keys()
     return [key['KeyId'] for key in response['Keys']]
 
 
 def kms_create_key(description, policy=None, bypass_policy_lockout_safety_check=False,
-                   key_usage='ENCRYPT_DECRYPT', origin='AWS_KMS', tags=[]):
+                   key_usage='ENCRYPT_DECRYPT', origin='AWS_KMS', tags=[], region=None):
     create_key_params = {
         'Description': description,
         'BypassPolicyLockoutSafetyCheck': bypass_policy_lockout_safety_check,
@@ -37,11 +37,11 @@ def kms_create_key(description, policy=None, bypass_policy_lockout_safety_check=
     if policy:
         create_key_params['Policy'] = policy
     logger.debug({'create_key_params': create_key_params})
-    client = get_client('kms')
+    client = get_client('kms', region=region)
     return client.create_key(**create_key_params).get('KeyMetadata')
 
 
-def kms_create_alias(alias_name, key_id):
+def kms_create_alias(alias_name, key_id, region=None):
     alias_name = __alias_name(alias_name)
     create_alias_params = {
         'AliasName': alias_name,
@@ -49,7 +49,7 @@ def kms_create_alias(alias_name, key_id):
     }
     logger.debug({'create_alias_params': create_alias_params})
     try:
-        client = get_client('kms')
+        client = get_client('kms', region=region)
         client.create_alias(**create_alias_params)
     except Exception as e:
         logger.error(str(e))
@@ -58,9 +58,9 @@ def kms_create_alias(alias_name, key_id):
 
 
 def kms_ensure_key(alias_name, description=None, policy=None, bypass_policy_lockout_safety_check=False,
-                   key_usage='ENCRYPT_DECRYPT', origin='AWS_KMS', tags=[]):
+                   key_usage='ENCRYPT_DECRYPT', origin='AWS_KMS', tags=[], region=None):
     alias_name = __alias_name(alias_name)
-    key_alias = get_alias_arn(alias_name)
+    key_alias = get_alias_arn(alias_name, region=region)
 
     if not key_alias:
         logger.debug('[kms_ensure_key] key does not exist... creating it...')
@@ -73,10 +73,11 @@ def kms_ensure_key(alias_name, description=None, policy=None, bypass_policy_lock
             bypass_policy_lockout_safety_check=bypass_policy_lockout_safety_check,
             key_usage=key_usage,
             origin=origin,
-            tags=tags
+            tags=tags,
+            region=region
         )
-        if kms_create_alias(alias_name, key['KeyId']):
+        if kms_create_alias(alias_name, key['KeyId'], region=region):
             # need to get the new alias arn
-            key_alias = get_alias_arn(alias_name)
+            key_alias = get_alias_arn(alias_name, region=region)
 
     return key_alias

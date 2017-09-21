@@ -7,13 +7,14 @@
 Property   | Type     | Required | Default     | Description
 -----------|----------|----------|-------------|-------------------------------------
 table_name | string   | yes      |             | The friendly name of the table.
+region     | string   | no       | us-east-1   | The AWS region
 
 
 #### Example
 
-```yaml
-credstash-setup:
-  cmd.run:
-    - name: /usr/local/bin/credstash setup
-    - unless: aws_boto3.ddb_get_table
+```python
+from aws_boto3 import ddb_get_table
+
+if not ddb_get_table('table-name', region='us-west-2'):
+    do some things
 ```
