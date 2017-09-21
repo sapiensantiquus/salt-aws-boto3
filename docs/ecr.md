@@ -7,6 +7,7 @@
 Property    | Type     | Required | Default     | Description
 ------------|----------|----------|-------------|-------------------------------------
 repo_name   | string   | yes      |             | The friendly name of the repository.
+region      | string   | no       | us-east-1   | The AWS region
 
 
 #### Example
@@ -27,6 +28,7 @@ Property    | Type     | Required | Default     | Description
 repo_name   | string   | yes      |             | The friendly name of the repository.
 force       | boolean  | no       | False       | Force the deletion of the repository if it contains images.
 registry_id | string   | no       |             | The AWS account ID associated with the registry that contains the repository to delete. If you do not specify a registry, the default registry is assumed.
+region      | string   | no       | us-east-1   | The AWS region
 
 
 #### Example

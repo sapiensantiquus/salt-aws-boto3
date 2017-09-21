@@ -6,14 +6,17 @@
 Make sure the key exists with an alias.
 
 
+Property                             | Type     | Required | Default           | Description
+-------------------------------------|----------|----------|-------------------|---------------
+alias_name                           | string   | yes      |                   | The friendly name of the key.
+description                          | string   | no       |                   | A string that describes the key.
+policy                               | string   | no       |                   |
+bypass_policy_lockout_safety_check   | boolean  | no       | False             |
+key_usage                            | string   | no       | `ENCRYPT_DECRYPT` |
+origin                               | string   | no       | `AWS_KMS`         |
+tags                                 | list     | no       |                   |
+region                      | string   | no       | us-east-1   | The AWS region
 
-* alias_name: str
-* description: str
-* policy: str
-* bypass_policy_lockout_safety_check: boolean Default: False
-* key_usage: str Default: `ENCRYPT_DECRYPT`
-* origin: str Default: `AWS_KMS`
-* tags: list
 
 #### Example
 
@@ -22,6 +25,7 @@ ensure-credstash-key:
   module.run:
     - name: aws_boto3.kms_ensure_key
     - alias_name: credstash
+    - region: "{{ aws_region }}"
 ```
 
 
