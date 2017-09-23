@@ -10,7 +10,8 @@ def s3_ensure_bucket(bucket_name, region=None, acl=None, grant_full_control=None
     status = {
         'bucket_name': bucket_name,
         'region': region,
-        'status': None
+        'status': None,
+        'exists': False
     }
 
     kwargs = {
@@ -36,9 +37,11 @@ def s3_ensure_bucket(bucket_name, region=None, acl=None, grant_full_control=None
         client = get_client('s3', region=region)
         response = client.create_bucket(**kwargs)
         status['status'] = 'Created'
+        status['exists'] = True
         status['response'] = response
     except ClientError as e:
         if 'BucketAlreadyOwnedByYou' not in str(e):
             raise e
         status['status'] = 'BucketAlreadyOwnedByYou'
+        status['exists'] = True
     return status
