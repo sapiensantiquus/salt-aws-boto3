@@ -30,9 +30,9 @@ def iam_ensure_role(role_name, assume_role_policy_document, region=None, path=No
     return response
 
 
-def iam_ensure_attached_policies(role_name, policies):
+def iam_ensure_attached_policies(role_name, policies, region=None):
     for policy in policies:
         if not policy.startswith('arn'):
             policy = get_policy_arn(policy)
-        attach_role_policy(role_name, policy)
-    return get_attached_policies(role_name)
+        attach_role_policy(role_name, policy, region=region)
+    return get_attached_policies(role_name, region=region)
