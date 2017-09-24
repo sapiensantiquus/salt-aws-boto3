@@ -1,11 +1,11 @@
 import json
+import os
 from collections import Mapping
 
 import boto3
 import jmespath
 
-AWS_REGION = 'us-east-1'
-# AWS_REGION = __grains__['aws_region']
+AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
 
 
 def get_client(name, client_type='client', region=None, *args, **kwargs):

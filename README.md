@@ -12,6 +12,7 @@ Use boto3 for AWS orchestration with Salt.
 
 ## <a name="salt-setup"></a> Salt Setup
 
+* set an environment variable for `AWS_REGION` (Default is `us-east-1`)
 * copy `aws_boto3` to your salt modules directory
 * copy `pip_deps.sls` to your salt states directory
 * run `salt '*' state.apply pip_deps`
