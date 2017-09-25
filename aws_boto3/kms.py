@@ -11,11 +11,16 @@ def __alias_name(alias):
     return alias
 
 
-def get_alias_arn(alias, region=None):
+def get_alias_attr(alias, return_attr='AliasArn', region=None):
+    q = "Aliases[?AliasName=='{}']".format(__alias_name(alias))
+    if return_attr.lower() == 'all':
+        q += " | [0]"
+    else:
+        q += ".{}".format(return_attr)
     return object_search(
         client=get_client('kms', region=region),
         paginator='list_aliases',
-        query="Aliases[?AliasName == '{}'].AliasArn".format(alias)
+        query=q
     )
 
 
@@ -60,7 +65,7 @@ def kms_create_alias(alias_name, key_id, region=None):
 def kms_ensure_key(alias_name, description=None, policy=None, bypass_policy_lockout_safety_check=False,
                    key_usage='ENCRYPT_DECRYPT', origin='AWS_KMS', tags=[], region=None):
     alias_name = __alias_name(alias_name)
-    key_alias = get_alias_arn(alias_name, region=region)
+    key_alias = get_alias_attr(alias_name, region=region)
 
     if not key_alias:
         logger.debug('[kms_ensure_key] key does not exist... creating it...')
@@ -78,6 +83,6 @@ def kms_ensure_key(alias_name, description=None, policy=None, bypass_policy_lock
         )
         if kms_create_alias(alias_name, key['KeyId'], region=region):
             # need to get the new alias arn
-            key_alias = get_alias_arn(alias_name, region=region)
+            key_alias = get_alias_attr(alias_name, region=region)
 
     return key_alias
