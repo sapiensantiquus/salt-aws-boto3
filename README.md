@@ -34,6 +34,7 @@ pip install --editable .
 * [ECS](./docs/ecs.md)
 * [IAM](./docs/iam.md)
 * [KMS](./docs/kms.md)
+* [Lambda](./docs/lambda.md)
 * [S3](./docs/s3.md)
 
 ## <a name="tests"></a> Tests

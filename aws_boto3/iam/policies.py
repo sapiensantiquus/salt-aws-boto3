@@ -1,6 +1,7 @@
 from botocore.exceptions import ClientError
 
 from aws_boto3.common import dict_to_str, get_client, object_search
+from aws_boto3.lookup import lookup
 
 
 def get_policy_arn(name, region=None):
@@ -13,6 +14,13 @@ def get_policy_arn(name, region=None):
 
 
 def create_policy(policy_name, policy_document, description=None, path=None, region=None):
+    for statement in policy_document.get('Statement', []):
+        if statement.get('Resource'):
+            if statement['Resource'].startswith('lookup'):
+                lookup_request = statement['Resource'].split(':')
+                lookup_request.pop(0)
+                statement['Resource'] = lookup(region=region, *lookup_request)
+
     kwargs = {
         'PolicyName': policy_name,
         'PolicyDocument': dict_to_str(policy_document)
