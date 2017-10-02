@@ -1,7 +1,6 @@
 from aws_boto3.common import get_client
 from aws_boto3.ecs.services import ecs_ensure_service
-from aws_boto3.ecs.tasks import ecs_ensure_register_task
-import logging
+
 
 def ecs_ensure_cluster(cluster, region=None):
     client = get_client('ecs', region=region)
