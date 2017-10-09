@@ -1,24 +1,27 @@
 from botocore.exceptions import ClientError
-from aws_boto3.common import get_client, object_search, AWS_REGION
+
+from aws_boto3.common import object_search, boto_client
+
 from aws_boto3.iam.roles import get_role_arn
 
 
-def lambda_lookup(name, return_attr='FunctionArn', region=None):
+@boto_client('lambda')
+def lambda_lookup(name, return_attr='FunctionArn', client=None, region=None):
     return object_search(
-        client=get_client('lambda', region=region),
+        client=client,
         paginator='list_functions',
         query="Functions[?FunctionName == '{}'].{}".format(name, return_attr),
         return_single=True
     )
 
 
-def lambda_create(function_definition, region=None):
+@boto_client('lambda')
+def lambda_create(function_definition, client=None, region=None):
     status = {
         'status': None,
         'exists': False
     }
     try:
-        client = get_client('lambda', region=region)
         response = client.create_function(**function_definition)
         status['status'] = 'Created'
         status['exists'] = True
@@ -32,17 +35,12 @@ def lambda_sync_function(function_name, handler, role_name, code, region=None, r
                          description=None, timeout=None, memory_size=None, publish=True,
                          vpc_config=None, dead_letter_config=None, environment=None,
                          kms_key_arn=None, tracing_config=None, tags=None):
-    if region is None:
-        region = AWS_REGION
-
     role = get_role_arn(role_name, region=region)
-
     status = {
         'function_name': function_name,
         'region': region,
         'actions': []
     }
-
     function_definition = {
         'FunctionName': function_name,
         'Runtime': runtime,

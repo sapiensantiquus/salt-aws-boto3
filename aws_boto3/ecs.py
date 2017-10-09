@@ -2,15 +2,17 @@ import logging
 
 from botocore.exceptions import ClientError
 
-from aws_boto3.common import get_client
+from aws_boto3.common import boto_client
 
 
-def ecs_ensure_register_task(task, region=None):
-    client = get_client('ecs', region=region)
+@boto_client('ecs')
+def ecs_ensure_register_task(task, region=None, client=None):
     return client.register_task_definition(**task['task_definition'])
 
 
-def ecs_ensure_service(service, region=None):
+@boto_client('ecs')
+def ecs_ensure_service(service, region=None, client=None):
+    logging.info("service: {}".format(str(service)))
     task_response = None
     if 'task' in service:
         task = service['task']
@@ -20,7 +22,6 @@ def ecs_ensure_service(service, region=None):
         task_arn = task_response['taskDefinition']['taskDefinitionArn']
         service['service_definition']['taskDefinition'] = task_arn
 
-    client = get_client('ecs', region=region)
     response = None
     create_failed = False
 
@@ -43,8 +44,8 @@ def ecs_ensure_service(service, region=None):
     return response
 
 
-def ecs_ensure_cluster(cluster, region=None):
-    client = get_client('ecs', region=region)
+@boto_client('ecs')
+def ecs_ensure_cluster(cluster, region=None, client=None):
     cluster_definition = cluster['cluster_definition']
     response = client.create_cluster(**cluster_definition)
 

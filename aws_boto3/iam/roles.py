@@ -1,26 +1,29 @@
 import jmespath
 from botocore.exceptions import ClientError
 
-from aws_boto3.common import dict_to_str, get_client, object_search
+from aws_boto3.common import boto_client, dict_to_str, object_search
 
 
-def get_role_arn(name, region=None):
+@boto_client('iam')
+def get_role_arn(name, region=None, client=None):
     return object_search(
-        client=get_client('iam', region=region),
+        client=client,
         paginator='list_roles',
         query="Roles[?RoleName == '{}'].Arn".format(name),
         return_single=True
     )
 
 
-def get_attached_policies(name, region=None):
+@boto_client('iam')
+def get_attached_policies(name, region=None, client=None):
     return jmespath.search(
         "AttachedPolicies[*].PolicyName",
-        get_client('iam', region=region).list_attached_role_policies(RoleName=name)
+        client.list_attached_role_policies(RoleName=name)
     )
 
 
-def create_role(name, assume_role_policy_document, path=None, description=None, region=None):
+@boto_client('iam')
+def create_role(name, assume_role_policy_document, path=None, description=None, region=None, client=None):
     kwargs = {
         'RoleName': name,
         'AssumeRolePolicyDocument': dict_to_str(assume_role_policy_document)
@@ -30,19 +33,18 @@ def create_role(name, assume_role_policy_document, path=None, description=None, 
     if description:
         kwargs['Description'] = description
 
-    client = get_client('iam', region=region)
     role = client.create_role(**kwargs)
     return role['Role'].get('Arn')
 
 
-def attach_role_policy(role_name, policy_arn, region=None):
+@boto_client('iam')
+def attach_role_policy(role_name, policy_arn, region=None, client=None):
     kwargs = {
         'RoleName': role_name,
         'PolicyArn': policy_arn
     }
     response = False
     try:
-        client = get_client('iam', region=region)
         client.attach_role_policy(**kwargs)
         response = get_attached_policies(role_name)
     except ClientError as e:

@@ -1,12 +1,11 @@
 from botocore.exceptions import ClientError
-from aws_boto3.common import get_client, AWS_REGION
+from aws_boto3.common import boto_client
 
 
+@boto_client('s3')
 def s3_ensure_bucket(bucket_name, region=None, acl=None, grant_full_control=None,
-                     grant_read=None, grant_read_acp=None, grant_write=None, grant_write_acp=None):
-    if region is None:
-        region = AWS_REGION
-
+                     grant_read=None, grant_read_acp=None, grant_write=None,
+                     grant_write_acp=None, client=None):
     status = {
         'bucket_name': bucket_name,
         'region': region,
@@ -34,7 +33,6 @@ def s3_ensure_bucket(bucket_name, region=None, acl=None, grant_full_control=None
         kwargs['GrantWriteACP'] = grant_write_acp
 
     try:
-        client = get_client('s3', region=region)
         response = client.create_bucket(**kwargs)
         status['status'] = 'Created'
         status['exists'] = True
