@@ -6,13 +6,17 @@ from aws_boto3.common import boto_client
 
 
 @boto_client('ecs')
+def ensure_instance(container_def, region=None, client=None):
+    return client.register_container_instance(**container_def)
+
+
+@boto_client('ecs')
 def ensure_register_task(task, region=None, client=None):
     return client.register_task_definition(**task['task_definition'])
 
 
 @boto_client('ecs')
 def ensure_service(service, region=None, client=None):
-    logging.info("service: {}".format(str(service)))
     task_response = None
     if 'task' in service:
         task = service['task']
@@ -45,6 +49,6 @@ def ensure_service(service, region=None, client=None):
 
 
 @boto_client('ecs')
-def ensure_cluster(cluster, region=None, client=None):
-    response = client.create_cluster(**cluster)
+def ensure_cluster(cluster_def, region=None, client=None):
+    response = client.create_cluster(**cluster_def)
     return response['cluster']['clusterArn']
