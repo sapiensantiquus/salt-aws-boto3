@@ -1,19 +1,21 @@
 from botocore.exceptions import ClientError
 
-from aws_boto3.common import dict_to_str, get_client, object_search
+from aws_boto3.common import boto_client, dict_to_str, object_search
 from aws_boto3.lookup import lookup
 
 
-def get_policy_arn(name, region=None):
+@boto_client('iam')
+def get_policy_arn(name, region=None, client=None):
     return object_search(
-        client=get_client('iam', region=region),
+        client=client,
         paginator='list_policies',
         query="Policies[?PolicyName == '{}'].Arn".format(name),
         return_single=True
     )
 
 
-def create_policy(policy_name, policy_document, description=None, path=None, region=None):
+@boto_client('iam')
+def create_policy(policy_name, policy_document, description=None, path=None, region=None, client=None):
     for statement in policy_document.get('Statement', []):
         if statement.get('Resource'):
             if statement['Resource'].startswith('lookup'):
@@ -32,7 +34,6 @@ def create_policy(policy_name, policy_document, description=None, path=None, reg
 
     response = False
     try:
-        client = get_client('iam', region=region)
         response = client.create_policy(**kwargs)
         response = response['Policy']['Arn']
     except ClientError as e:
