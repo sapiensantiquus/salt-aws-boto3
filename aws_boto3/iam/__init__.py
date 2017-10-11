@@ -1,5 +1,11 @@
+from aws_boto3.common import boto_client
 from aws_boto3.iam.policies import create_policy, get_policy_arn
 from aws_boto3.iam.roles import attach_role_policy, create_role, get_attached_policies, get_role_arn
+
+
+@boto_client('sts')
+def get_account_id(client=None, region=None):
+    return client.get_caller_identity()['Account']
 
 
 def iam_ensure_role(role_name, assume_role_policy_document, region=None, path=None, description=None,
