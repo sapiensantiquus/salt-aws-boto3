@@ -35,7 +35,7 @@ def dict_to_str(thing):
 
 
 def boto_client(service_name, client_type='client', region=AWS_REGION,
-                   client_param_name='client', region_param_name='region'):
+                client_param_name='client', region_param_name='region'):
     def _get_client(func):
         @wraps(func)
         def make_client(*args, **kwargs):

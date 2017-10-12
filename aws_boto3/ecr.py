@@ -1,6 +1,8 @@
 import logging
 
-from aws_boto3.common import boto_client, object_search
+from botocore.exceptions import ClientError
+
+from aws_boto3.common import boto_client, dict_to_str, object_search
 
 logger = logging.getLogger(__name__)
 
@@ -16,16 +18,27 @@ def get_repo_attr(name, return_attr='repositoryArn', region=None, client=None):
 
 
 @boto_client('ecr')
-def ecr_ensure_repo(repo_name, region=None, client=None):
-    response = False
-    repo_arn = get_repo_attr(repo_name)
-    if not repo_arn:
+def ecr_ensure_repo(repo_name, policy=None, region=None, client=None):
+    response = {
+        'repositoryArn': get_repo_attr(repo_name)
+    }
+    if not response['repositoryArn']:
         try:
-            response = client.create_repository(repositoryName=repo_name)
-            repo_arn = response['repository']['repositoryArn']
-        except Exception:
+            response['create_repository'] = client.create_repository(repositoryName=repo_name)
+            response['repositoryArn'] = response['create_repository']['repository']['repositoryArn']
+        except ClientError:
+            # TODO
             raise
-    return {'repositoryArn': repo_arn}
+    if policy:
+        try:
+            response['set_repository_policy'] = client.set_repository_policy(
+                repositoryName=repo_name,
+                policyText=dict_to_str(policy)
+            )
+        except ClientError:
+            # TODO
+            raise
+    return response
 
 
 @boto_client('ecr')
