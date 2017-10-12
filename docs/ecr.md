@@ -4,10 +4,11 @@
 ## `ecr_ensure_repo`
 
 
-Property    | Type     | Required | Default     | Description
-------------|----------|----------|-------------|-------------------------------------
-repo_name   | string   | yes      |             | The friendly name of the repository.
-region      | string   | no       | us-east-1   | The AWS region
+Property    | Type        | Required | Default     | Description
+------------|-------------|----------|-------------|-------------------------------------
+repo_name   | string      | yes      |             | The friendly name of the repository.
+region      | string      | no       | us-east-1   | The AWS region
+policy      | string/dict | no       |             | IAM policy specifying permissions for this repo
 
 
 #### Example
