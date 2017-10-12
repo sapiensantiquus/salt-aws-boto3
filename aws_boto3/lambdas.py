@@ -1,6 +1,6 @@
 from botocore.exceptions import ClientError
 
-from aws_boto3.common import object_search, boto_client
+from aws_boto3.common import boto_client, object_search
 
 from aws_boto3.iam.roles import get_role_arn
 
@@ -71,6 +71,6 @@ def lambda_sync_function(function_name, handler, role_name, code, region=None, r
     lambda_arn = lambda_lookup(function_name, region=region)
 
     if not lambda_arn:
-        status['actions'].append(lambda_create(function_definition, region))
+        status['actions'].append(lambda_create(function_definition, region=region))
 
     return status
