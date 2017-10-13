@@ -16,12 +16,6 @@ def lambda_lookup(name, return_attr='FunctionArn', client=None, region=None):
 
 
 @boto_client('lambda')
-def run_fn(fn_name, payload, client=None, region=None):
-    fn = getattr(client, fn_name)
-    return fn(**payload)
-
-
-@boto_client('lambda')
 def lambda_create(function_definition, client=None, region=None):
     status = {
         'status': None,
@@ -37,7 +31,28 @@ def lambda_create(function_definition, client=None, region=None):
     return {'lambda_create': status}
 
 
-# def publish_version()
+@boto_client('lambda')
+def publish_version(function_name, version, alias, region=None, client=None):
+    response = {'actions': []}
+    publish_response = client.publish_version(
+        FunctionName=function_name,
+        Description=version
+    )
+    response['lambda_version'] = publish_response.get('Version')
+    response['actions'].append({'publish_version': publish_response})
+    try:
+        alias_response = client.create_alias(
+            FunctionName=function_name,
+            Name=alias,
+            FunctionVersion=response['lambda_version']
+        )
+        response['actions'].append({'create_alias': alias_response})
+    except ClientError as e:
+        if 'Alias already exists' not in str(e):
+            # TODO
+            raise e
+    response['alias'] = alias
+    return response
 
 
 def lambda_sync_function(function_name, handler, role_name, code, region=None, runtime='python2.7',
@@ -83,33 +98,8 @@ def lambda_sync_function(function_name, handler, role_name, code, region=None, r
         status['actions'].append(lambda_create(function_definition, region=region))
 
     if publish:
-        publish_response = run_fn(
-            'publish_version',
-            payload={
-                'FunctionName': function_name,
-                'Description': version
-            },
-            region=region
-        )
-        lambda_version = publish_response.get('Version')
-        status['lambda_version'] = lambda_version
-        status['actions'].append({'publish_version': publish_response})
+        published = publish_version(function_name, version, alias, region)
+        status['actions'].extend(published.pop('actions'))
+        status.update(published)
 
-        try:
-            alias_response = run_fn(
-                'create_alias',
-                payload={
-                    'FunctionName': function_name,
-                    'Name': alias,
-                    'FunctionVersion': lambda_version
-                },
-                region=region
-            )
-            status['alias'] = alias
-            status['actions'].append({'create_alias': alias_response})
-        except ClientError as e:
-            if 'Alias already exists' not in str(e):
-                # TODO
-                raise e
-            status['alias'] = alias
     return status
