@@ -31,10 +31,34 @@ def lambda_create(function_definition, client=None, region=None):
     return {'lambda_create': status}
 
 
+@boto_client('lambda')
+def publish_version(function_name, version, alias, region=None, client=None):
+    response = {'actions': []}
+    publish_response = client.publish_version(
+        FunctionName=function_name,
+        Description=version
+    )
+    response['lambda_version'] = publish_response.get('Version')
+    response['actions'].append({'publish_version': publish_response})
+    try:
+        alias_response = client.create_alias(
+            FunctionName=function_name,
+            Name=alias,
+            FunctionVersion=response['lambda_version']
+        )
+        response['actions'].append({'create_alias': alias_response})
+    except ClientError as e:
+        if 'Alias already exists' not in str(e):
+            # TODO
+            raise e
+    response['alias'] = alias
+    return response
+
+
 def lambda_sync_function(function_name, handler, role_name, code, region=None, runtime='python2.7',
                          description=None, timeout=None, memory_size=None, publish=True,
                          vpc_config=None, dead_letter_config=None, environment=None,
-                         kms_key_arn=None, tracing_config=None, tags=None):
+                         kms_key_arn=None, tracing_config=None, tags=None, version=None, alias=None):
     role = get_role_arn(role_name, region=region)
     status = {
         'function_name': function_name,
@@ -72,5 +96,10 @@ def lambda_sync_function(function_name, handler, role_name, code, region=None, r
 
     if not lambda_arn:
         status['actions'].append(lambda_create(function_definition, region=region))
+
+    if publish:
+        published = publish_version(function_name, version, alias, region)
+        status['actions'].extend(published.pop('actions'))
+        status.update(published)
 
     return status
