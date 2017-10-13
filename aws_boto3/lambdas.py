@@ -16,6 +16,12 @@ def lambda_lookup(name, return_attr='FunctionArn', client=None, region=None):
 
 
 @boto_client('lambda')
+def run_fn(fn_name, payload, client=None, region=None):
+    fn = getattr(client, fn_name)
+    return fn(**payload)
+
+
+@boto_client('lambda')
 def lambda_create(function_definition, client=None, region=None):
     status = {
         'status': None,
@@ -31,10 +37,13 @@ def lambda_create(function_definition, client=None, region=None):
     return {'lambda_create': status}
 
 
+# def publish_version()
+
+
 def lambda_sync_function(function_name, handler, role_name, code, region=None, runtime='python2.7',
                          description=None, timeout=None, memory_size=None, publish=True,
                          vpc_config=None, dead_letter_config=None, environment=None,
-                         kms_key_arn=None, tracing_config=None, tags=None):
+                         kms_key_arn=None, tracing_config=None, tags=None, version=None, alias=None):
     role = get_role_arn(role_name, region=region)
     status = {
         'function_name': function_name,
@@ -73,4 +82,34 @@ def lambda_sync_function(function_name, handler, role_name, code, region=None, r
     if not lambda_arn:
         status['actions'].append(lambda_create(function_definition, region=region))
 
+    if publish:
+        publish_response = run_fn(
+            'publish_version',
+            payload={
+                'FunctionName': function_name,
+                'Description': version
+            },
+            region=region
+        )
+        lambda_version = publish_response.get('Version')
+        status['lambda_version'] = lambda_version
+        status['actions'].append({'publish_version': publish_response})
+
+        try:
+            alias_response = run_fn(
+                'create_alias',
+                payload={
+                    'FunctionName': function_name,
+                    'Name': alias,
+                    'FunctionVersion': lambda_version
+                },
+                region=region
+            )
+            status['alias'] = alias
+            status['actions'].append({'create_alias': alias_response})
+        except ClientError as e:
+            if 'Alias already exists' not in str(e):
+                # TODO
+                raise e
+            status['alias'] = alias
     return status
