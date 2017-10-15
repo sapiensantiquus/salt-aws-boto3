@@ -8,6 +8,19 @@ def get_account_id(client=None, region=None):
     return client.get_caller_identity()['Account']
 
 
+def iam_ensure_policy(policy_name, policy_document, path=None, description=None, region=None):
+    arn = get_policy_arn(policy_name)
+    if not arn:
+        arn = create_policy(
+            policy_name=policy_name,
+            policy_document=policy_document,
+            description=description,
+            path=path,
+            region=region
+        )
+    return arn
+
+
 def iam_ensure_role(role_name, assume_role_policy_document, region=None, path=None, description=None,
                     attach_policy_name=None, attach_policy_path=None, attach_policy_description=None,
                     attach_policy_document=None):
@@ -19,24 +32,22 @@ def iam_ensure_role(role_name, assume_role_policy_document, region=None, path=No
     response = {'RoleArn': role_arn}
 
     if all([attach_policy_name, attach_policy_document]):
-        policy_arn = get_policy_arn(attach_policy_name)
-        if not policy_arn:
-            policy_arn = create_policy(
-                policy_name=attach_policy_name,
-                policy_document=attach_policy_document,
-                description=attach_policy_description,
-                path=attach_policy_path
-            )
-
+        policy_arn = iam_ensure_policy(
+            policy_name=attach_policy_name,
+            policy_document=attach_policy_document,
+            path=attach_policy_path,
+            description=attach_policy_description,
+            region=region
+        )
     response['PolicyArn'] = policy_arn
-
     if all([role_arn, policy_arn]):
         response['attach_role_policy'] = attach_role_policy(role_name, policy_arn)
-
     return response
 
 
 def iam_ensure_attached_policies(role_name, policies, region=None):
+    if isinstance(policies, str):
+        policies = [policies]
     for policy in policies:
         if not policy.startswith('arn'):
             policy = get_policy_arn(policy)
