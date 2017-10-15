@@ -46,6 +46,8 @@ def iam_ensure_role(role_name, assume_role_policy_document, region=None, path=No
 
 
 def iam_ensure_attached_policies(role_name, policies, region=None):
+    if isinstance(policies, str):
+        policies = [policies]
     for policy in policies:
         if not policy.startswith('arn'):
             policy = get_policy_arn(policy)
