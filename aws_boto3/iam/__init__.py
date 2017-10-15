@@ -1,6 +1,6 @@
 from aws_boto3.common import boto_client
 from aws_boto3.iam.policies import create_policy, get_policy_arn
-from aws_boto3.iam.roles import attach_role_policy, create_role, get_attached_policies, get_role_arn
+from aws_boto3.iam.roles import attach_role_policy, create_role, detach_role_policy, get_attached_policies, get_role_arn
 
 
 @boto_client('sts')
@@ -45,11 +45,19 @@ def iam_ensure_role(role_name, assume_role_policy_document, region=None, path=No
     return response
 
 
-def iam_ensure_attached_policies(role_name, policies, region=None):
+def __policy_attachment(role_name, policies, action_fn, region=None):
     if isinstance(policies, str):
         policies = [policies]
     for policy in policies:
         if not policy.startswith('arn'):
             policy = get_policy_arn(policy)
-        attach_role_policy(role_name, policy, region=region)
+        action_fn(role_name, policy, region=region)
     return get_attached_policies(role_name, region=region)
+
+
+def iam_attach_policies(role_name, policies, region=None):
+    return __policy_attachment(role_name, policies, attach_role_policy, region)
+
+
+def iam_detach_policies(role_name, policies, region=None):
+    return __policy_attachment(role_name, policies, detach_role_policy, region)

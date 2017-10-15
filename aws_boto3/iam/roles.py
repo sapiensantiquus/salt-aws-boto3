@@ -51,3 +51,19 @@ def attach_role_policy(role_name, policy_arn, region=None, client=None):
         response = {'ERROR': str(e), 'kwargs': kwargs}
         # response = False
     return response
+
+
+@boto_client('iam')
+def detach_role_policy(role_name, policy_arn, region=None, client=None):
+    kwargs = {
+        'RoleName': role_name,
+        'PolicyArn': policy_arn
+    }
+    response = False
+    try:
+        client.detach_role_policy(**kwargs)
+        response = get_attached_policies(role_name)
+    except ClientError as e:
+        response = {'ERROR': str(e), 'kwargs': kwargs}
+        # response = False
+    return response
