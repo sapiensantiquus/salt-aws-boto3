@@ -1,6 +1,6 @@
 from botocore.exceptions import ClientError
 
-from aws_boto3.common import boto_client, object_search
+from aws_boto3.common import boto_client, dict_to_str, object_search
 
 from aws_boto3.iam.roles import get_role_arn
 
@@ -13,6 +13,20 @@ def lambda_lookup(name, return_attr='FunctionArn', client=None, region=None):
         query="Functions[?FunctionName == '{}'].{}".format(name, return_attr),
         return_single=True
     )
+
+
+@boto_client('lambda')
+def lambda_invoke(function_name, payload=None, client=None, region=None):
+    kwargs = {'FunctionName': function_name}
+    if payload:
+        kwargs['Payload'] = dict_to_str(payload)
+    response = None
+    try:
+        response = client.invoke(**kwargs)
+        response['Payload'].read()
+    except ClientError as e:
+        raise e
+    return response
 
 
 @boto_client('lambda')
