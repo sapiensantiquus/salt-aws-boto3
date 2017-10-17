@@ -29,6 +29,19 @@ pip install --editable .
 
 ## <a name="docs"></a> Documentation
 
+### Run any boto3 client
+
+[See the boto3 docs](http://boto3.readthedocs.io/en/latest/reference/services/index.html)
+
+
+```python
+from aws_boto3 import run_client
+# run_client(service, function, region=None, payload=None)
+run_client('ec2', 'create_key_pair', payload={'KeyName': 'foo'})
+```
+
+### More docs
+
 * [DynamoDB](./docs/dynamodb.md)
 * [ECR](./docs/ecr.md)
 * [ECS](./docs/ecs.md)
@@ -36,6 +49,7 @@ pip install --editable .
 * [KMS](./docs/kms.md)
 * [Lambda](./docs/lambda.md)
 * [S3](./docs/s3.md)
+
 
 ## <a name="tests"></a> Tests
 
