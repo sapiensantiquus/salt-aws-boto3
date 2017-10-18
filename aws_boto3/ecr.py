@@ -20,7 +20,7 @@ def get_repo_attr(name, return_attr='repositoryArn', region=None, client=None):
 @boto_client('ecr')
 def ecr_ensure_repo(repo_name, policy=None, region=None, client=None):
     response = {
-        'repositoryArn': get_repo_attr(repo_name)
+        'repositoryArn': get_repo_attr(repo_name, region=region)
     }
     if not response['repositoryArn']:
         try:
