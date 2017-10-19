@@ -29,11 +29,7 @@ def ensure_service(service, region=None, client=None):
     response = None
     create_failed = False
 
-    try:
-        response = client.create_service(**service['service_definition'])
-    except ClientError:
-        logging.warn("Failed to create service. Attempting to update...")
-        create_failed = True
+    response = client.create_service(**service['service_definition'])
 
     if create_failed:
         service_def = service['service_definition']
