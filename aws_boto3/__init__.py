@@ -1,5 +1,6 @@
 # required by SaltStack
 from aws_boto3.dynamodb import ddb_get_table
+from aws_boto3.ec2 import ensure_elb
 from aws_boto3.ecr import ecr_absent_repo, ecr_ensure_repo
 from aws_boto3.ecs import ecs_ensure_config
 from aws_boto3.iam import iam_ensure_role

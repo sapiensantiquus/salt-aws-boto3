@@ -16,7 +16,7 @@ def lambda_lookup(name, return_attr='FunctionArn', client=None, region=None):
 
 
 @boto_client('lambda')
-def lambda_invoke(function_name, payload=None, client=None, region=None):
+def lambda_invoke(function_name, payload=None, region=None, client=None):
     kwargs = {'FunctionName': function_name}
     if payload:
         kwargs['Payload'] = dict_to_str(payload)
